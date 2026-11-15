@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InterNauticos: Orbit Lab // NASA Space Apps Challenge</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Font Awesome Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            deepSpace: '#070B14',
+            telemetryPanel: '#0F172A',
+            panelBorder: '#1E293B',
+            telemetryCyan: '#38BDF8',
+            alertAmber: '#F59E0B',
+            nominalGreen: '#10B981',
+            crimsonWarn: '#EF4444',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #070B14;
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+    .blueprint-grid {
+      background-image: linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .cyan-glow {
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.15);
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070B14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38BDF8;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-telemetryCyan selection:text-deepSpace">
+
+  <!-- TOP NAVBAR -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-deepSpace/90 backdrop-blur-md border-b border-telemetryCyan/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#hero" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-telemetryCyan/10 border border-telemetryCyan/40 flex items-center justify-center text-telemetryCyan">
+          <i class="fa-solid fa-satellite"></i>
+        </div>
+        <div>
+          <span class="font-display font-bold text-base sm:text-lg text-white block leading-none">InterNauticos</span>
+          <span class="font-mono text-[11px] font-bold text-telemetryCyan tracking-widest block mt-0.5">// ORBIT LAB</span>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+        <a href="#overview" class="hover:text-telemetryCyan transition">Overview</a>
+        <a href="#phases" class="hover:text-telemetryCyan transition">5 Phases</a>
+        <a href="#simulator" class="hover:text-telemetryCyan transition">Trade-Off Simulator</a>
+        <a href="#coop" class="hover:text-telemetryCyan transition">Co-Op Roles</a>
+      </nav>
+
+      <button
+        onclick="openPitchModal()"
+        class="px-4 py-2 rounded-xl bg-alertAmber hover:bg-amber-400 text-deepSpace font-mono text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-alertAmber/20"
+      >
+        <i class="fa-solid fa-microphone-lines"></i>
+        <span>Elevator Pitch</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO SECTION WITH CANVAS ORBITAL ANIMATION -->
+  <section id="hero" class="relative min-h-screen pt-24 pb-16 flex items-center border-b border-telemetryCyan/25 overflow-hidden">
+    <canvas id="heroCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-b from-deepSpace/30 via-deepSpace/70 to-deepSpace pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      <div class="grid lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-telemetryCyan/10 border border-telemetryCyan/30 text-telemetryCyan font-mono text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-nominalGreen animate-ping"></span>
+            NASA SPACE APPS CHALLENGE // MISSION SIMULATOR
+          </div>
+
+          <h1 class="font-display text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.08]">
+            InterNauticos: <br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-telemetryCyan via-sky-300 to-alertAmber">
+              Orbit Lab
+            </span>
+          </h1>
+
+          <p class="text-lg sm:text-xl text-slate-300 leading-relaxed max-w-2xl">
+            Design spacecraft, balance competing engineering constraints, and simulate full space missions from concept to orbit—solo or in a cooperative 4-player team.
+          </p>
+
+          <div class="flex flex-wrap gap-4 pt-2">
+            <a
+              href="#simulator"
+              class="px-6 py-3.5 rounded-xl bg-telemetryCyan hover:bg-sky-300 text-deepSpace font-bold text-sm sm:text-base transition flex items-center gap-2.5 shadow-lg shadow-telemetryCyan/25"
+            >
+              <i class="fa-solid fa-sliders"></i>
+              <span>Test Trade-Off Simulator</span>
+            </a>
+            <a
+              href="#phases"
+              class="px-6 py-3.5 rounded-xl bg-telemetryPanel hover:bg-slate-800 border border-panelBorder text-white font-semibold text-sm sm:text-base transition flex items-center gap-2.5"
+            >
+              <i class="fa-solid fa-layer-group text-alertAmber"></i>
+              <span>Explore 5 Game Phases</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="bg-telemetryPanel/90 backdrop-blur-md border border-panelBorder rounded-2xl p-6 cyan-glow">
+            <div class="flex items-center justify-between border-b border-panelBorder pb-3 mb-4">
+              <span class="font-mono text-xs text-telemetryCyan font-bold tracking-widest">MISSION TELEMETRY HUD</span>
+              <span class="font-mono text-xs text-nominalGreen flex items-center gap-1.5">
+                <i class="fa-solid fa-circle text-[8px]"></i> NOMINAL
+              </span>
+            </div>
+
+            <div class="space-y-4">
+              <div class="p-3.5 rounded-xl bg-deepSpace border border-panelBorder flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-telemetryCyan/10 text-telemetryCyan flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div>
+                  <p class="font-mono text-sm font-bold text-white">6 Critical Resources</p>
+                  <p class="text-xs text-slate-400">Mass, Power, Budget, Data, Comms &amp; Time in equilibrium.</p>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-deepSpace border border-panelBorder flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-alertAmber/10 text-alertAmber flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div>
+                  <p class="font-mono text-sm font-bold text-white">4 Co-Op Roles</p>
+                  <p class="text-xs text-slate-400">Director, Spacecraft Engineer, Science Lead, Comms Officer.</p>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-deepSpace border border-panelBorder flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-nominalGreen/10 text-nominalGreen flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-orbit"></i>
+                </div>
+                <div>
+                  <p class="font-mono text-sm font-bold text-white">Real Physics Engine</p>
+                  <p class="text-xs text-slate-400">Orbital altitudes, eclipses, payload limits &amp; random anomalies.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW SECTION -->
+  <section id="overview" class="py-20 blueprint-grid border-b border-telemetryCyan/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-12">
+        <p class="font-mono text-xs font-bold text-alertAmber tracking-widest uppercase mb-2">
+          01 // NASA SPACE APPS CHALLENGE
+        </p>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mb-4">
+          Why Space Mission Design Is a Balancing Act
+        </h2>
+        <p class="text-slate-300 text-lg leading-relaxed">
+          Designing a space mission requires balancing competing demands. In <strong class="text-white">InterNautics: Orbit Lab</strong>, every major design choice has a direct consequence, bridging abstract engineering concepts into tangible gameplay.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-7 hover:border-telemetryCyan/50 transition">
+          <div class="w-12 h-12 rounded-xl bg-telemetryCyan/10 text-telemetryCyan flex items-center justify-center text-xl mb-5">
+            <i class="fa-solid fa-scale-unbalanced"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-white mb-3">Interdependent Variables</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Adding a powerful scientific instrument increases data and scientific value, but also hikes mass, power consumption, cost, and downlink requirements.
+          </p>
+        </div>
+
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-7 hover:border-alertAmber/50 transition">
+          <div class="w-12 h-12 rounded-xl bg-alertAmber/10 text-alertAmber flex items-center justify-center text-xl mb-5">
+            <i class="fa-solid fa-code-branch"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-white mb-3">No Single Perfect Solution</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Different combinations of spacecraft, instruments, orbits, and launch vehicles can achieve the same mission objective, encouraging creative problem-solving.
+          </p>
+        </div>
+
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-7 hover:border-nominalGreen/50 transition">
+          <div class="w-12 h-12 rounded-xl bg-nominalGreen/10 text-nominalGreen flex items-center justify-center text-xl mb-5">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-white mb-3">Causal Feedback</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Instead of simply stating "Mission Failed", the game explains *why* (e.g., battery drain during eclipse or insufficient ground antenna bandwidth).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 PHASES WALKTHROUGH -->
+  <section id="phases" class="py-20 border-b border-telemetryCyan/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+          <p class="font-mono text-xs font-bold text-telemetryCyan tracking-widest uppercase mb-2">
+            02 // GAMEPLAY ARCHITECTURE
+          </p>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">
+            The 5 Phases of a Mission
+          </h2>
+        </div>
+        <p class="font-mono text-xs text-slate-400">SELECT A PHASE TO INSPECT INTERACTIVE WORKFLOW</p>
+      </div>
+
+      <!-- Phase Tabs Selector -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+        <button onclick="switchPhase(1)" id="pBtn1" class="phase-btn p-4 rounded-xl border text-left transition bg-telemetryCyan/15 border-telemetryCyan text-white">
+          <span class="font-mono text-xs text-telemetryCyan font-bold block">PHASE 01</span>
+          <span class="font-display font-bold text-sm sm:text-base mt-1 block">Mission Definition</span>
+        </button>
+        <button onclick="switchPhase(2)" id="pBtn2" class="phase-btn p-4 rounded-xl border border-panelBorder bg-telemetryPanel text-slate-400 hover:text-white text-left transition">
+          <span class="font-mono text-xs text-slate-500 font-bold block">PHASE 02</span>
+          <span class="font-display font-bold text-sm sm:text-base mt-1 block">Spacecraft Builder</span>
+        </button>
+        <button onclick="switchPhase(3)" id="pBtn3" class="phase-btn p-4 rounded-xl border border-panelBorder bg-telemetryPanel text-slate-400 hover:text-white text-left transition">
+          <span class="font-mono text-xs text-slate-500 font-bold block">PHASE 03</span>
+          <span class="font-display font-bold text-sm sm:text-base mt-1 block">Orbit &amp; Launch</span>
+        </button>
+        <button onclick="switchPhase(4)" id="pBtn4" class="phase-btn p-4 rounded-xl border border-panelBorder bg-telemetryPanel text-slate-400 hover:text-white text-left transition">
+          <span class="font-mono text-xs text-slate-500 font-bold block">PHASE 04</span>
+          <span class="font-display font-bold text-sm sm:text-base mt-1 block">Live Simulation</span>
+        </button>
+        <button onclick="switchPhase(5)" id="pBtn5" class="phase-btn col-span-2 sm:col-span-1 p-4 rounded-xl border border-panelBorder bg-telemetryPanel text-slate-400 hover:text-white text-left transition">
+          <span class="font-mono text-xs text-slate-500 font-bold block">PHASE 05</span>
+          <span class="font-display font-bold text-sm sm:text-base mt-1 block">Post-Mission Debrief</span>
+        </button>
+      </div>
+
+      <!-- Phase Display Card -->
+      <div id="phaseContentBox" class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 sm:p-10 cyan-glow">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE TRADE-OFF SIMULATOR SECTION -->
+  <section id="simulator" class="py-20 blueprint-grid border-b border-telemetryCyan/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-alertAmber/15 border border-alertAmber/40 text-alertAmber font-mono text-xs font-bold mb-3">
+          <i class="fa-solid fa-flask"></i> INTERACTIVE PLAYABLE DEMO
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mb-3">
+          Trade-Off &amp; Mission Simulator
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg">
+          Configure difficulty, select scientific instruments, choose your target orbit and launch vehicle, then run the simulation to test your architectural choices against real constraints.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-8 items-start">
+        <!-- Left: Configuration Controls -->
+        <div class="lg:col-span-6 bg-telemetryPanel border border-panelBorder rounded-2xl p-6 sm:p-8 space-y-6">
+          <div>
+            <label class="font-mono text-xs font-bold text-telemetryCyan uppercase tracking-wider block mb-2.5">
+              1. Difficulty Level
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <button id="diffCadet" onclick="setDifficulty('cadet')" class="p-3.5 rounded-xl border border-telemetryCyan bg-telemetryCyan/15 text-left transition">
+                <span class="font-mono text-xs font-bold text-telemetryCyan block">CADET MODE</span>
+                <span class="text-xs text-slate-300">Higher budget ($150M) &amp; guided hints.</span>
+              </button>
+              <button id="diffEngineer" onclick="setDifficulty('engineer')" class="p-3.5 rounded-xl border border-panelBorder bg-deepSpace text-left transition hover:border-slate-600">
+                <span class="font-mono text-xs font-bold text-alertAmber block">ENGINEER MODE</span>
+                <span class="text-xs text-slate-400">Strict budget ($115M) &amp; solar storms.</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="font-mono text-xs font-bold text-telemetryCyan uppercase tracking-wider block mb-2.5">
+              2. Payload: Scientific Instruments
+            </label>
+            <div class="space-y-2.5">
+              <label class="flex items-center justify-between p-3.5 rounded-xl bg-deepSpace border border-panelBorder cursor-pointer hover:border-telemetryCyan/50 transition">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" id="instImager" checked onchange="updateSim()" class="w-5 h-5 accent-telemetryCyan rounded" />
+                  <div>
+                    <span class="font-semibold text-sm text-white block">Multispectral Imager</span>
+                    <span class="font-mono text-[11px] text-slate-400">+30 Sci | 90kg | 140W | $20M | 12 GB/day</span>
+                  </div>
+                </div>
+                <span class="font-mono text-xs text-telemetryCyan font-bold">OPTICAL</span>
+              </label>
+
+              <label class="flex items-center justify-between p-3.5 rounded-xl bg-deepSpace border border-panelBorder cursor-pointer hover:border-telemetryCyan/50 transition">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" id="instSpectro" onchange="updateSim()" class="w-5 h-5 accent-telemetryCyan rounded" />
+                  <div>
+                    <span class="font-semibold text-sm text-white block">Atmospheric Spectrometer</span>
+                    <span class="font-mono text-[11px] text-slate-400">+35 Sci | 120kg | 190W | $26M | 18 GB/day</span>
+                  </div>
+                </div>
+                <span class="font-mono text-xs text-nominalGreen font-bold">CHEMICAL</span>
+              </label>
+
+              <label class="flex items-center justify-between p-3.5 rounded-xl bg-deepSpace border border-panelBorder cursor-pointer hover:border-telemetryCyan/50 transition">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" id="instRadar" onchange="updateSim()" class="w-5 h-5 accent-telemetryCyan rounded" />
+                  <div>
+                    <span class="font-semibold text-sm text-white block">Synthetic Aperture Radar (SAR)</span>
+                    <span class="font-mono text-[11px] text-slate-400">+45 Sci | 210kg | 340W | $38M | 35 GB/day</span>
+                  </div>
+                </div>
+                <span class="font-mono text-xs text-alertAmber font-bold">HIGH DEMAND</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="orbitSelect" class="font-mono text-xs font-bold text-telemetryCyan uppercase tracking-wider block mb-2">
+                3. Target Orbit
+              </label>
+              <select id="orbitSelect" onchange="updateSim()" class="w-full p-3 rounded-xl bg-deepSpace border border-panelBorder text-sm text-white font-medium focus:outline-none focus:border-telemetryCyan">
+                <option value="leo">LEO 400 km (Low Altitude)</option>
+                <option value="sso" selected>SSO 700 km (Sun-Synchronous)</option>
+                <option value="geo">GEO 35,786 km (Geostationary)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="rocketSelect" class="font-mono text-xs font-bold text-telemetryCyan uppercase tracking-wider block mb-2">
+                4. Launch Vehicle
+              </label>
+              <select id="rocketSelect" onchange="updateSim()" class="w-full p-3 rounded-xl bg-deepSpace border border-panelBorder text-sm text-white font-medium focus:outline-none focus:border-telemetryCyan">
+                <option value="light">Light Launcher ($18M | 380kg max)</option>
+                <option value="medium" selected>Medium Launcher ($32M | 650kg max)</option>
+                <option value="heavy">Heavy Launcher ($55M | 1200kg max)</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            onclick="runSimulationExecution()"
+            class="w-full py-4 rounded-xl bg-gradient-to-r from-alertAmber to-amber-500 hover:from-amber-500 hover:to-amber-400 text-deepSpace font-display font-bold text-lg tracking-wide transition shadow-lg shadow-alertAmber/25 flex items-center justify-center gap-3"
+          >
+            <i class="fa-solid fa-play"></i>
+            <span>EXECUTE MISSION SIMULATION</span>
+          </button>
+        </div>
+
+        <!-- Right: Telemetry HUD & Simulation Results -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center justify-between border-b border-panelBorder pb-4 mb-6">
+              <div>
+                <span class="font-mono text-xs text-telemetryCyan font-bold block">LIVE TELEMETRY HUD</span>
+                <h3 class="font-display text-xl font-bold text-white">6 Critical Resources</h3>
+              </div>
+              <div class="text-right">
+                <span class="font-mono text-xs text-slate-400 block">SCIENCE VALUE</span>
+                <span id="scoreBadge" class="font-mono text-xl font-bold text-nominalGreen">30 PTS</span>
+              </div>
+            </div>
+
+            <div class="space-y-4 font-mono text-xs">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-weight-hanging text-telemetryCyan mr-1.5"></i>TOTAL MASS / ORBIT LIMIT</span>
+                  <span id="massText" class="font-bold text-white">290 / 540 kg</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="massBar" class="h-full bg-telemetryCyan transition-all duration-300" style="width: 53%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-bolt text-alertAmber mr-1.5"></i>POWER DEMAND (BUS: 460W)</span>
+                  <span id="powerText" class="font-bold text-white">270 / 460 W</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="powerBar" class="h-full bg-nominalGreen transition-all duration-300" style="width: 58%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-coins text-amber-400 mr-1.5"></i>BUDGET UTILIZATION</span>
+                  <span id="budgetText" class="font-bold text-white">$87M / $150M</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="budgetBar" class="h-full bg-telemetryCyan transition-all duration-300" style="width: 58%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-database text-purple-400 mr-1.5"></i>DAILY DATA GENERATION</span>
+                  <span id="dataText" class="font-bold text-white">12 GB / day</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="dataBar" class="h-full bg-purple-400 transition-all duration-300" style="width: 25%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-tower-broadcast text-nominalGreen mr-1.5"></i>DOWNLINK BANDWIDTH</span>
+                  <span id="commsText" class="font-bold text-nominalGreen">100% DOWNLOADED</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="commsBar" class="h-full bg-nominalGreen transition-all duration-300" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300"><i class="fa-solid fa-hourglass-half text-sky-300 mr-1.5"></i>ESTIMATED MISSION LIFETIME</span>
+                  <span id="lifeText" class="font-bold text-white">48 Months</span>
+                </div>
+                <div class="w-full h-2.5 bg-deepSpace rounded-full overflow-hidden border border-panelBorder">
+                  <div id="lifeBar" class="h-full bg-sky-400 transition-all duration-300" style="width: 80%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="alertBox" class="mt-6 p-4 rounded-xl bg-deepSpace border border-panelBorder text-xs font-mono text-slate-300">
+              <span class="text-nominalGreen font-bold">[SYSTEM NOMINAL]</span> All parameters within safe operating thresholds. Ready for launch.
+            </div>
+          </div>
+
+          <div id="simResultBox" class="hidden bg-telemetryPanel border-2 border-telemetryCyan rounded-2xl p-6 sm:p-8 transition-all">
+            <!-- Populated on simulation run -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CO-OP ROLES SECTION -->
+  <section id="coop" class="py-20 border-b border-telemetryCyan/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-14">
+        <p class="font-mono text-xs font-bold text-telemetryCyan tracking-widest uppercase mb-2">
+          03 // MULTIPLAYER CONCURRENT ENGINEERING
+        </p>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mb-4">
+          4 Specialized Roles, One Shared Mission
+        </h2>
+        <p class="text-slate-300 text-lg">
+          Play solo or form a team of up to 4 participants where each member manages competing responsibilities and must negotiate collectively before launch.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 flex flex-col justify-between hover:border-telemetryCyan transition">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-telemetryCyan">ROLE 01</span>
+              <i class="fa-solid fa-compass text-telemetryCyan text-xl"></i>
+            </div>
+            <h3 class="font-display text-xl font-bold text-white mb-2">Mission Director</h3>
+            <p class="text-sm text-slate-400 mb-4">
+              Defines strategic objectives, oversees global budget allocation, selects target orbit, and authorizes launch windows.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-panelBorder font-mono text-[11px] text-slate-300">
+            <span class="text-alertAmber font-bold">PRIORITY:</span> Budget &amp; Compliance
+          </div>
+        </div>
+
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 flex flex-col justify-between hover:border-alertAmber transition">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-alertAmber">ROLE 02</span>
+              <i class="fa-solid fa-screwdriver-wrench text-alertAmber text-xl"></i>
+            </div>
+            <h3 class="font-display text-xl font-bold text-white mb-2">Spacecraft Engineer</h3>
+            <p class="text-sm text-slate-400 mb-4">
+              Designs structure, solar arrays, power systems, and ADCS, verifying mass limits against launch vehicle capacities.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-panelBorder font-mono text-[11px] text-slate-300">
+            <span class="text-alertAmber font-bold">PRIORITIES:</span> Mass &amp; Power
+          </div>
+        </div>
+
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 flex flex-col justify-between hover:border-nominalGreen transition">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-nominalGreen">ROLE 03</span>
+              <i class="fa-solid fa-microscope text-nominalGreen text-xl"></i>
+            </div>
+            <h3 class="font-display text-xl font-bold text-white mb-2">Science Lead</h3>
+            <p class="text-sm text-slate-400 mb-4">
+              Selects scientific instruments (cameras, spectrometers, radars) to maximize scientific return and discovery value.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-panelBorder font-mono text-[11px] text-slate-300">
+            <span class="text-alertAmber font-bold">PRIORITIES:</span> Scientific Value
+          </div>
+        </div>
+
+        <div class="bg-telemetryPanel border border-panelBorder rounded-2xl p-6 flex flex-col justify-between hover:border-purple-400 transition">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-purple-400">ROLE 04</span>
+              <i class="fa-solid fa-satellite-dish text-purple-400 text-xl"></i>
+            </div>
+            <h3 class="font-display text-xl font-bold text-white mb-2">Comms Officer</h3>
+            <p class="text-sm text-slate-400 mb-4">
+              Manages onboard memory buffer, downlink antennas, and ground station contact windows to prevent data loss.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-panelBorder font-mono text-[11px] text-slate-300">
+            <span class="text-alertAmber font-bold">PRIORITIES:</span> Downlink &amp; Storage
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-deepSpace border-t border-panelBorder py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-telemetryCyan/10 border border-telemetryCyan/30 flex items-center justify-center text-telemetryCyan">
+          <i class="fa-solid fa-satellite"></i>
+        </div>
+        <div>
+          <p class="font-mono text-sm font-bold text-white">INTERNAUTICS: ORBIT LAB</p>
+          <p class="font-mono text-xs text-slate-500">Built for NASA Space Apps Challenge</p>
+        </div>
+      </div>
+      <div class="font-mono text-xs text-slate-400">
+        STATUS: PROTOTYPE READY // ALL SYSTEMS NOMINAL
+      </div>
+    </div>
+  </footer>
+
+  <!-- ELEVATOR PITCH MODAL -->
+  <div id="pitchModal" class="fixed inset-0 z-50 hidden bg-deepSpace/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-telemetryPanel border border-telemetryCyan/40 rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative">
+      <button onclick="closePitchModal()" aria-label="Close modal" class="absolute top-5 right-5 w-9 h-9 rounded-lg bg-deepSpace border border-panelBorder text-slate-400 hover:text-white flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <span class="font-mono text-xs font-bold text-alertAmber tracking-widest">ELEVATOR PITCH // NASA JUDGES</span>
+      <h3 class="font-display text-2xl font-bold text-white mt-1 mb-4">
+        InterNautics: Orbit Lab in 30 Seconds
+      </h3>
+      <p class="text-sm text-slate-300 leading-relaxed mb-5">
+        "In real aerospace engineering, no subsystem exists in isolation. <strong>InterNautics: Orbit Lab</strong> turns full space mission design into an interactive game where students and 4-player teams balance mass, power, budget, orbit, and telemetry—discovering through real simulation why space missions succeed or fail."
+      </p>
+
+      <div class="bg-deepSpace border border-panelBorder rounded-xl p-4 mb-6 font-mono text-xs space-y-1.5 text-slate-300">
+        <p><span class="text-telemetryCyan font-bold">✓</span> Solo &amp; 4-player co-op concurrent engineering modes.</p>
+        <p><span class="text-telemetryCyan font-bold">✓</span> Real orbital mechanics &amp; dynamic space weather events.</p>
+        <p><span class="text-telemetryCyan font-bold">✓</span> Causal post-mission debrief reports.</p>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="closePitchModal()" class="px-5 py-2.5 rounded-xl bg-telemetryCyan text-deepSpace font-bold text-sm hover:bg-sky-300 transition">
+          Return to Simulator
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 1. Modal Pitch
+    function openPitchModal() {
+      document.getElementById('pitchModal').classList.remove('hidden');
+    }
+    function closePitchModal() {
+      document.getElementById('pitchModal').classList.add('hidden');
+    }
+
+    // 2. Hero Canvas Starfield & Orbit Animation
+    const canvas = document.getElementById('heroCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let angle = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      stars = Array.from({ length: 80 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.2,
+        alpha: Math.random() * 0.7 + 0.2,
+      }));
+    }
+
+    function animateHero() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach((s) => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(248, 250, 252, ${s.alpha})`;
+        ctx.fill();
+      });
+
+      const cx = canvas.width > 900 ? canvas.width * 0.75 : canvas.width * 0.5;
+      const cy = canvas.height * 0.5;
+      const rx = Math.min(canvas.width * 0.26, 240);
+      const ry = rx * 0.5;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-0.2);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 40, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(14, 116, 144, 0.2)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      const sx = Math.cos(angle) * rx;
+      const sy = Math.sin(angle) * ry;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#F59E0B';
+      ctx.fill();
+      ctx.restore();
+
+      angle += 0.007;
+      requestAnimationFrame(animateHero);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      animateHero();
+      switchPhase(1);
+      updateSim();
+    });
+
+    // 3. 5 Phases Walkthrough Data
+    const phasesInfo = {
+      1: {
+        tag: 'PHASE 01 // MISSION DEFINITION & OBJECTIVES',
+        title: 'Define Scientific Goals Before Building Hardware',
+        desc: 'Participants begin by defining the primary mission objective—such as monitoring polar ice caps, tracking greenhouse gases, or relaying communications. Teams review initial resource constraints and minimum success criteria.',
+        bullets: [
+          'Choose from multiple realistic scenarios (Earth Observation, Deep Space, Space Weather).',
+          'Identify critical resource priorities for each specific mission type.',
+          'Assign team roles in co-op mode (up to 4 participants).'
+        ],
+        mockupTitle: 'MISSION BRIEFING // ARCTIC GLACIER MONITORING',
+        mockupRows: [
+          { label: 'PRIMARY GOAL', val: 'Polar altimetry coverage (> 80 science pts)', color: 'text-telemetryCyan' },
+          { label: 'BUDGET ALLOCATED', val: '$120 Million USD', color: 'text-nominalGreen' },
+          { label: 'OPERATIONAL LIFETIME', val: '24 Months in target orbit', color: 'text-white' },
+          { label: 'ORBITAL REQUISITE', val: 'Inclination > 82° required', color: 'text-alertAmber' }
+        ]
+      },
+      2: {
+        tag: 'PHASE 02 // SPACECRAFT & PAYLOAD ENGINEERING',
+        title: 'Modular Assembly & Direct Trade-Offs',
+        desc: 'Assemble spacecraft subsystems: structure, power systems, batteries, onboard computers, attitude control (ADCS), and science payloads. Every major design decision has an immediate consequence.',
+        bullets: [
+          'Adding high-end instruments increases science return, mass, power, and data output.',
+          'Cadet mode uses pre-configured buses; Engineer mode offers granular subsystem control.',
+          'Interactive 3D schematic visualizer highlighting resource bottlenecks.'
+        ],
+        mockupTitle: 'SPACECRAFT BUILDER // SAT-M2 BUS',
+        mockupRows: [
+          { label: 'ACTIVE PAYLOAD', val: 'Laser Altimeter + Multispectral Imager', color: 'text-telemetryCyan' },
+          { label: 'POWER BALANCE', val: '620W Generated / 580W Consumed (OK)', color: 'text-nominalGreen' },
+          { label: 'CUMULATIVE MASS', val: '445 kg (Structure, bus &amp; batteries)', color: 'text-white' },
+          { label: 'DATA GENERATION', val: '22.4 GB/day (X-band required)', color: 'text-alertAmber' }
+        ]
+      },
+      3: {
+        tag: 'PHASE 03 // ORBIT SELECTION & LAUNCH VEHICLES',
+        title: 'Astrodynamics & Launch Vehicle Compatibility',
+        desc: 'Select from LEO, SSO, MEO, GEO or deep space trajectories. The game demonstrates how altitude affects resolution, contact windows, and energy required.',
+        bullets: [
+          'Automatic compatibility check: Is spacecraft mass and target orbit compatible with the rocket?',
+          'Compare light, medium, and heavy launch vehicles by payload capacity and cost.',
+          'Visualize ground station coverage and revisit intervals.'
+        ],
+        mockupTitle: 'LAUNCH & ORBIT // TRAJECTORY VALIDATION',
+        mockupRows: [
+          { label: 'TARGET ORBIT', val: 'SSO 650 km (98° Inclination)', color: 'text-telemetryCyan' },
+          { label: 'LAUNCH VEHICLE', val: 'Falcon-M Medium Launcher ($32M)', color: 'text-white' },
+          { label: 'ROCKET CAPACITY', val: '445 kg / 600 kg Max in SSO', color: 'text-nominalGreen' },
+          { label: 'CONTACT WINDOW', val: '11 minutes per 97-minute orbit', color: 'text-alertAmber' }
+        ]
+      },
+      4: {
+        tag: 'PHASE 04 // LIVE SIMULATION & DYNAMIC EVENTS',
+        title: 'Real-Time Telemetry & Unexpected Space Anomalies',
+        desc: 'Launch the mission and monitor month-to-month performance with speed controls (1x, 2x, 4x). React to random solar storms, micrometeorites, or antenna congestion.',
+        bullets: [
+          'Live tracking of battery charge during eclipses, memory buffer fill, and thermal health.',
+          'Tactical team decisions: activate Safe Mode or risk continuous sensor operation.',
+          'Mission log recording ground station downlinks and anomaly responses.'
+        ],
+        mockupTitle: 'MISSION CONTROL // MONTH 14 OF 24 (4X SPEED)',
+        mockupRows: [
+          { label: 'ACTIVE ANOMALY', val: 'Class X Solar Storm (-30% solar power)', color: 'text-alertAmber' },
+          { label: 'BATTERY STATUS', val: '46% — Safe mode recommended', color: 'text-amber-400' },
+          { label: 'SCIENCE COLLECTED', val: '68 / 80 target points achieved', color: 'text-telemetryCyan' },
+          { label: 'LAST DOWNLINK', val: 'Svalbard Station: 14.8 GB downloaded OK', color: 'text-nominalGreen' }
+        ]
+      },
+      5: {
+        tag: 'PHASE 05 // POST-MISSION REPORT & DEBRIEFING',
+        title: 'Explain the "Why" and Optimize Your Design',
+        desc: 'Receive a comprehensive engineering report detailing your global score, resource efficiency, and causal diagnostics explaining why the mission succeeded or failed.',
+        bullets: [
+          'Multi-factor scoring: Scientific Return, Budget Efficiency, and Team Coordination.',
+          'Clear causal diagnostics (e.g., "Lost 15% data due to insufficient antenna bandwidth").',
+          'Export designs, compare on leaderboards, or instantly iterate in Sandbox mode.'
+        ],
+        mockupTitle: 'DEBRIEFING // FINAL ENGINEERING REPORT',
+        mockupRows: [
+          { label: 'MISSION STATUS', val: 'COMPLETE SUCCESS (24/24 Months)', color: 'text-nominalGreen' },
+          { label: 'GLOBAL SCORE', val: '890 / 1,000 PTS (Global Top 10%)', color: 'text-telemetryCyan' },
+          { label: 'KEY SUCCESS FACTOR', val: 'SSO orbit maximized daily polar coverage', color: 'text-white' },
+          { label: 'IMPROVEMENT AREA', val: 'Adding flash memory prevents buffer saturation', color: 'text-alertAmber' }
+        ]
+      }
+    };
+
+    function switchPhase(num) {
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`pBtn${i}`);
+        if (i === num) {
+          btn.className = 'phase-btn p-4 rounded-xl border text-left transition bg-telemetryCyan/15 border-telemetryCyan text-white shadow-lg shadow-telemetryCyan/10';
+          btn.querySelector('span:first-child').className = 'font-mono text-xs text-telemetryCyan font-bold block';
+        } else {
+          btn.className = 'phase-btn p-4 rounded-xl border border-panelBorder bg-telemetryPanel text-slate-400 hover:text-white text-left transition';
+          btn.querySelector('span:first-child').className = 'font-mono text-xs text-slate-500 font-bold block';
+        }
+      }
+
+      const p = phasesInfo[num];
+      const rowsHtml = p.mockupRows.map(r => `
+        <div class="p-3.5 rounded-xl bg-deepSpace border border-panelBorder flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <span class="font-mono text-xs text-slate-400">${r.label}</span>
+          <span class="font-mono text-xs sm:text-sm font-bold ${r.color}">${r.val}</span>
+        </div>
+      `).join('');
+
+      const bulletsHtml = p.bullets.map(b => `
+        <li class="flex items-start gap-2.5 text-sm text-slate-300">
+          <i class="fa-solid fa-angle-right text-telemetryCyan mt-1"></i>
+          <span>${b}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('phaseContentBox').innerHTML = `
+        <div class="grid lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-6 space-y-4">
+            <span class="font-mono text-xs font-bold text-alertAmber tracking-wider">${p.tag}</span>
+            <h3 class="font-display text-2xl sm:text-3xl font-bold text-white">${p.title}</h3>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${p.desc}</p>
+            <ul class="space-y-2.5 pt-2">${bulletsHtml}</ul>
+          </div>
+          <div class="lg:col-span-6 bg-deepSpace border border-panelBorder rounded-2xl p-5 sm:p-6 space-y-3">
+            <div class="flex items-center justify-between border-b border-panelBorder pb-3 mb-2">
+              <span class="font-mono text-xs font-bold text-telemetryCyan">${p.mockupTitle}</span>
+              <div class="flex gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-alertAmber"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-nominalGreen"></span>
+              </div>
+            </div>
+            ${rowsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // 4. Trade-Off Simulator Engine
+    let currentDifficulty = 'cadet';
+
+    function setDifficulty(lvl) {
+      currentDifficulty = lvl;
+      const bCad = document.getElementById('diffCadet');
+      const bEng = document.getElementById('diffEngineer');
+      if (lvl === 'cadet') {
+        bCad.className = 'p-3.5 rounded-xl border border-telemetryCyan bg-telemetryCyan/15 text-left transition';
+        bEng.className = 'p-3.5 rounded-xl border border-panelBorder bg-deepSpace text-left transition hover:border-slate-600';
+      } else {
+        bEng.className = 'p-3.5 rounded-xl border border-alertAmber bg-alertAmber/15 text-left transition';
+        bCad.className = 'p-3.5 rounded-xl border border-panelBorder bg-deepSpace text-left transition hover:border-slate-600';
+      }
+      updateSim();
+    }
+
+    function calculateMetrics() {
+      const imager = document.getElementById('instImager').checked;
+      const spectro = document.getElementById('instSpectro').checked;
+      const radar = document.getElementById('instRadar').checked;
+      const orbit = document.getElementById('orbitSelect').value;
+      const rocket = document.getElementById('rocketSelect').value;
+
+      let mass = 190;
+      let power = 110;
+      let cost = 30;
+      let dataRate = 0;
+      let science = 0;
+
+      if (imager) { mass += 90; power += 140; cost += 20; dataRate += 12; science += 30; }
+      if (spectro) { mass += 120; power += 190; cost += 26; dataRate += 18; science += 35; }
+      if (radar) { mass += 210; power += 340; cost += 38; dataRate += 35; science += 45; }
+
+      const rocketSpecs = {
+        light: { cost: 18, leo: 380, sso: 310, geo: 140 },
+        medium: { cost: 32, leo: 650, sso: 540, geo: 280 },
+        heavy: { cost: 55, leo: 1200, sso: 980, geo: 560 },
+      };
+
+      const selRocket = rocketSpecs[rocket];
+      cost += selRocket.cost;
+      const maxMass = selRocket[orbit];
+      const maxBudget = currentDifficulty === 'cadet' ? 150 : 115;
+      const maxPower = currentDifficulty === 'cadet' ? 520 : 450;
+
+      let commsEfficiency = 100;
+      let lifeMonths = 36;
+      let orbitMultiplier = 1;
+
+      if (orbit === 'leo') {
+        lifeMonths = 30;
+        commsEfficiency = dataRate > 45 ? 75 : 100;
+      } else if (orbit === 'sso') {
+        orbitMultiplier = 1.15;
+        lifeMonths = 48;
+        commsEfficiency = dataRate > 50 ? 82 : 100;
+      } else if (orbit === 'geo') {
+        orbitMultiplier = 0.9;
+        lifeMonths = 60;
+        commsEfficiency = 100;
+      }
+
+      const finalScience = Math.round(science * orbitMultiplier * (commsEfficiency / 100));
+
+      return {
+        mass, maxMass, power, maxPower, cost, maxBudget, dataRate, commsEfficiency, lifeMonths, finalScience,
+        hasPayload: imager || spectro || radar, orbit, rocket
+      };
+    }
+
+    function updateSim() {
+      const m = calculateMetrics();
+
+      document.getElementById('scoreBadge').textContent = `${m.finalScience} PTS`;
+
+      document.getElementById('massText').textContent = `${m.mass} / ${m.maxMass} kg`;
+      const massPct = Math.min((m.mass / m.maxMass) * 100, 100);
+      const mBar = document.getElementById('massBar');
+      mBar.style.width = `${massPct}%`;
+      mBar.className = `h-full transition-all duration-300 ${m.mass > m.maxMass ? 'bg-alertAmber' : 'bg-telemetryCyan'}`;
+
+      document.getElementById('powerText').textContent = `${m.power} / ${m.maxPower} W`;
+      const pwrPct = Math.min((m.power / m.maxPower) * 100, 100);
+      const pBar = document.getElementById('powerBar');
+      pBar.style.width = `${pwrPct}%`;
+      pBar.className = `h-full transition-all duration-300 ${m.power > m.maxPower ? 'bg-alertAmber' : 'bg-nominalGreen'}`;
+
+      document.getElementById('budgetText').textContent = `$${m.cost}M / $${m.maxBudget}M`;
+      const bgtPct = Math.min((m.cost / m.maxBudget) * 100, 100);
+      const bBar = document.getElementById('budgetBar');
+      bBar.style.width = `${bgtPct}%`;
+      bBar.className = `h-full transition-all duration-300 ${m.cost > m.maxBudget ? 'bg-alertAmber' : 'bg-telemetryCyan'}`;
+
+      document.getElementById('dataText').textContent = `${m.dataRate} GB / day`;
+      document.getElementById('dataBar').style.width = `${Math.min((m.dataRate / 65) * 100, 100)}%`;
+
+      document.getElementById('commsText').textContent = `${m.commsEfficiency}% DOWNLOADED`;
+      document.getElementById('commsBar').style.width = `${m.commsEfficiency}%`;
+
+      document.getElementById('lifeText').textContent = `${m.lifeMonths} Months`;
+      document.getElementById('lifeBar').style.width = `${(m.lifeMonths / 60) * 100}%`;
+
+      const alerts = [];
+      if (!m.hasPayload) alerts.push('No scientific payload selected: mission will yield 0 science data.');
+      if (m.mass > m.maxMass) alerts.push(`Mass limit exceeded (${m.mass} kg > ${m.maxMass} kg allowed by rocket for ${m.orbit.toUpperCase()}).`);
+      if (m.power > m.maxPower) alerts.push(`Power deficit! (${m.power} W exceeds solar generation of ${m.maxPower} W during eclipse).`);
+      if (m.cost > m.maxBudget) alerts.push(`Budget overrun ($${m.cost}M exceeds $${m.maxBudget}M limit).`);
+      if (m.commsEfficiency < 100) alerts.push(`Downlink bottleneck: ${100 - m.commsEfficiency}% data lost due to short ground contact passes.`);
+
+      const alertBox = document.getElementById('alertBox');
+      if (alerts.length === 0) {
+        alertBox.innerHTML = `<span class="text-nominalGreen font-bold">[SYSTEM NOMINAL]</span> All subsystems balanced. Ready for simulation launch.`;
+      } else {
+        alertBox.innerHTML = alerts.map(a => `<div class="text-alertAmber mb-1"><span class="font-bold">[ALERT]</span> ${a}</div>`).join('');
+      }
+    }
+
+    function runSimulationExecution() {
+      const m = calculateMetrics();
+      const resBox = document.getElementById('simResultBox');
+      resBox.classList.remove('hidden');
+
+      const issues = [];
+      if (!m.hasPayload) issues.push('No instruments selected for payload.');
+      if (m.mass > m.maxMass) issues.push(`Launch vehicle capacity exceeded in ${m.orbit.toUpperCase()}.`);
+      if (m.power > m.maxPower) issues.push('Power consumption exceeded solar generation capacity.');
+      if (m.cost > m.maxBudget) issues.push('Mission budget exceeded allowed limits.');
+
+      if (issues.length > 0) {
+        resBox.className = 'bg-telemetryPanel border-2 border-alertAmber rounded-2xl p-6 sm:p-8';
+        resBox.innerHTML = `
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-alertAmber/20 text-alertAmber flex items-center justify-center text-lg">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <span class="font-mono text-xs font-bold text-alertAmber">SIMULATION RESULT // CRITICAL ANOMALY</span>
+              <h4 class="font-display text-xl font-bold text-white">Mission Compromised — Re-engineering Required</h4>
+            </div>
+          </div>
+          <p class="text-sm text-slate-300 mb-3">Physics Engine Causal Diagnostics:</p>
+          <ul class="space-y-2 text-xs font-mono text-amber-200 bg-deepSpace p-4 rounded-xl border border-alertAmber/30">
+            ${issues.map(i => `<li>• ${i}</li>`).join('')}
+          </ul>
+          <p class="text-xs text-slate-400 mt-4">
+            <strong class="text-white">Engineering Tip:</strong> Adjust your launch vehicle, change orbit altitude, or re-balance payload power demands and re-run.
+          </p>
+        `;
+      } else {
+        const efficiencyBonus = Math.round(((m.maxBudget - m.cost) / m.maxBudget) * 200);
+        const totalScore = Math.min(1000, m.finalScience * 7 + efficiencyBonus + m.lifeMonths * 2);
+
+        resBox.className = 'bg-telemetryPanel border-2 border-nominalGreen rounded-2xl p-6 sm:p-8';
+        resBox.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-nominalGreen/20 text-nominalGreen flex items-center justify-center text-lg">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div>
+                <span class="font-mono text-xs font-bold text-nominalGreen">SIMULATION RESULT // STABLE ORBIT</span>
+                <h4 class="font-display text-xl font-bold text-white">Mission Successful!</h4>
+              </div>
+            </div>
+            <div class="px-4 py-2 rounded-xl bg-deepSpace border border-nominalGreen/40 font-mono text-right">
+              <span class="text-[10px] text-slate-400 block">FINAL SCORE</span>
+              <span class="text-lg font-bold text-nominalGreen">${totalScore} / 1,000 PTS</span>
+            </div>
+          </div>
+          <p class="text-sm text-slate-300 leading-relaxed bg-deepSpace p-4 rounded-xl border border-panelBorder">
+            <strong class="text-telemetryCyan">Post-Mission Debrief:</strong> Your spacecraft successfully operated for <strong>${m.lifeMonths} months</strong> in <strong>${m.orbit.toUpperCase()}</strong> orbit, yielding <strong>${m.finalScience} science points</strong> with <strong>$${m.maxBudget - m.cost}M</strong> remaining in budget reserves. ${m.commsEfficiency < 100 ? 'Note: A higher bandwidth antenna would have eliminated minor downlink data loss.' : 'Ground downlink operated at 100% efficiency without data loss.'}
+          </p>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
